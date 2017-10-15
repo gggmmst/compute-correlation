@@ -11,55 +11,11 @@ pat_crumb = r'"CrumbStore":{"crumb":"(.*?)"}'
 
 def crumb_and_cookie(ticker):
     metaurl = fmt_metaurl.format(ticker)
-    # res = rq.get(metaurl)
     res = http.get(metaurl)
     cookie = res.headers.get('set-cookie')
     # TODO re.search no match?
     crumb = re.search(pat_crumb, res.text).group(1)
     return crumb, cookie
-
-
-# def datestr_to_epoch(datestr, fmt='%Y-%m-%d'):
-#     dt = datetime.strptime(datestr, fmt)
-#     return dt.strftime('%s')
-
-
-# def datestr_offset(datestr, inc=1, fmt='%Y-%m-%d'):
-#     dt = datetime.strptime(datestr, fmt)
-#     dt += timedelta(days=inc)
-#     return dt.strftime(fmt)
-
-# from functools import wraps, partial
-# import time
-
-# from requests.exceptions import RequestException
-
-# # alternative requests retry
-# # https://www.peterbe.com/plog/best-practice-with-retries-with-requests
-# def request_with_retry(req, attempts=4, delay=1, backoff=1.6):
-#     # variable scope of nested functions in python2
-#     # https://eli.thegreenplace.net/2011/05/15/understanding-unboundlocalerror-in-python
-#     # TODO docstring, params
-#     @wraps(req)
-#     def _retry(attemtps, delay, backoff, *a, **kw):
-#         for attempt in xrange(attemtps):
-#             try:
-#                 res = req(*a, **kw)
-#                 if not res.status_code == rq.codes.ok:
-#                     res.raise_for_status()
-#                 return res
-#             except RequestException as ex:
-#                 print ex        # TODO make logging
-#                 print 'Request attempt #{} failed, retry in {} seconds ...'.format(attempt+1, delay)   # TODO logging
-#                 time.sleep(delay)
-#                 delay *= backoff
-#             except Exception as ex:
-#                 print ex    # TODO make logging
-#         print 'Failed to connect server: maximum request attemtps({}) reached.'.format(attemtps)
-#         return None
-
-#     return partial(_retry, attempts, delay, backoff)
-
 
 
 def hist_px(ticker, t0, t1):
@@ -74,18 +30,11 @@ def hist_px(ticker, t0, t1):
                'events'  : 'history',
                'crumb'   : crumb}
 
-    # LOG.info(res.url)
-
-    # res = request_with_retry(rq.post)(baseurl, params=payload, cookies={'Cookie': cookie})
     res = http.post_with_retry(baseurl, params=payload, cookies={'Cookie': cookie})
 
     if res is None:
         print 'Failed to download data from yahoo finance.'
         return None
-
-    # res = retry(rq.post(baseurl, params=payload, cookies={'Cookie': cookie}))
-    # if not res.status_code == rq.codes.ok:
-    #     res.raise_for_status()
 
     return res.text
 
@@ -113,11 +62,6 @@ def get_args():
 # df = pd.read_csv(StringIO(raw.decode('utf-8')))
 # print df
 
-def test_datestr_offset():
-    print datestr_offset('2010-01-01')
-    print datestr_offset('2010-01-01', -1)
-    print datestr_offset('2010-12-31')
-    print datestr_offset('2010-12-31', -1)
 
 def main():
     a = get_args()
