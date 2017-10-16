@@ -33,7 +33,7 @@ def hist_px(ticker, t0, t1):
     res = http.post_with_retry(baseurl, params=payload, cookies={'Cookie': cookie})
 
     if res is None:
-        print 'Failed to download data from yahoo finance.'
+        print('Failed to download data (ticker={},startdate={},enddate={}) from yahoo finance.'.format(ticker, t0, t1))
         return None
 
     return res.text
@@ -54,19 +54,10 @@ def get_args():
 
     return args
 
-# try:
-#     from cStringIO import StringIO
-# except ImportError:
-#     from StringIO import StringIO
-# import pandas as pd
-# df = pd.read_csv(StringIO(raw.decode('utf-8')))
-# print df
-
-
 def main():
     a = get_args()
     px = hist_px(a.sym, a.t0, a.t1)
-    print px
+    print(px)
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,6 @@
+
+#import logging
+
 import time
 from functools import wraps, partial
 
@@ -14,21 +17,21 @@ def request_with_retry(req, attempts=4, delay=1, backoff=1.6):
     # https://eli.thegreenplace.net/2011/05/15/understanding-unboundlocalerror-in-python
     @wraps(req)
     def _retry(attemtps, delay, backoff, *a, **kw):
-        for attempt in xrange(attemtps):
+        for attempt in range(attemtps):
             try:
                 res = req(*a, **kw)
-                print res.url   # TODO logging
+                print(res.url)   # TODO logging
                 if not res.status_code == rq.codes.ok:
                     res.raise_for_status()
                 return res
             except RequestException as ex:
-                print ex        # TODO make logging
-                print 'Request attempt #{} failed, retry in {} seconds ...'.format(attempt+1, delay)   # TODO logging
+                print(ex)        # TODO make logging
+                print('Request attempt #{} failed, retry in {} seconds ...'.format(attempt+1, delay))   # TODO logging
                 time.sleep(delay)
                 delay *= backoff
             except Exception as ex:
-                print ex    # TODO make logging
-        print 'Request failed: maximum request attemtps({}) reached.'.format(attemtps)
+                print(ex)    # TODO make logging
+        print('Request failed: maximum request attemtps({}) reached.'.format(attemtps))
         return None
 
     return partial(_retry, attempts, delay, backoff)

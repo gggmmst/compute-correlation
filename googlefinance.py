@@ -42,7 +42,7 @@ def get_args():
 def main():
     a = get_args()
     px = hist_px(a.sym, a.t0, a.t1)
-    print px
+    print(px)
 
 if __name__ == '__main__':
     main()

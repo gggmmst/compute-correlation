@@ -14,14 +14,14 @@ def datestr_offset(datestr, inc=1, fmt='%Y-%m-%d'):
 
 
 def test_datestr_to_epoch():
-    print datestr_to_epoch('20101111', fmt='%Y%m%d')
-    print datestr_to_epoch('1970-01-01')
+    print(datestr_to_epoch('20101111', fmt='%Y%m%d'))
+    print(datestr_to_epoch('1970-01-01'))
 
 def test_datestr_offset():
-    print datestr_offset('2010-01-01')
-    print datestr_offset('2010-01-01', -1)
-    print datestr_offset('2010-12-31')
-    print datestr_offset('2010-12-31', -1)
+    print(datestr_offset('2010-01-01'))
+    print(datestr_offset('2010-01-01', -1))
+    print(datestr_offset('2010-12-31'))
+    print(datestr_offset('2010-12-31', -1))
 
 def test():
     test_datestr_to_epoch()
