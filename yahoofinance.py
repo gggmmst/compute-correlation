@@ -1,3 +1,5 @@
+# import logging
+
 import re
 # import requests as rq
 # from datetime import datetime, timedelta
@@ -5,35 +7,56 @@ import re
 import utils.http as http
 import utils.date as date
 
+
+# LOG = logging.getLogger(__name__)
+
+
 fmt_metaurl = 'https://finance.yahoo.com/quote/{0}/history?p={0}'
+fmt_baseurl = 'https://query1.finance.yahoo.com/v7/finance/download/{}'
 pat_crumb = r'"CrumbStore":{"crumb":"(.*?)"}'
+
+
+class YahooFinanceException(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+        print(msg)
+        # LOG.error(msg)
+        # LOG.error(msg, exc_info=True)
 
 
 def crumb_and_cookie(ticker):
     metaurl = fmt_metaurl.format(ticker)
-    res = http.get(metaurl)
+    res = http.get_with_retry(metaurl)     # http GET
+    # extract cookie
     cookie = res.headers.get('set-cookie')
-    # TODO re.search no match?
-    crumb = re.search(pat_crumb, res.text).group(1)
+    if cookie is None:
+        msg = 'Failed to extract cookie from url [{}]'.format(metaurl)
+        raise YahooFinanceException(msg)
+    # extract crumb
+    match = re.search(pat_crumb, res.text)
+    if match is None:
+        msg = 'Failed to extract crumb from url [{}]'.format(metaurl)
+        raise YahooFinanceException(msg)
+    crumb = match.group(1)
     return crumb, cookie
 
 
 def hist_px(ticker, t0, t1):
 
-    ticker = ticker.upper()
+    baseurl = fmt_baseurl.format(ticker)
 
     crumb, cookie = crumb_and_cookie(ticker)
-    baseurl = 'https://query1.finance.yahoo.com/v7/finance/download/{}'.format(ticker)
     payload = {'period1' : date.datestr_to_epoch(t0),
                'period2' : date.datestr_to_epoch(t1),
                'interval': '1d',
                'events'  : 'history',
                'crumb'   : crumb}
 
+    # http POST
     res = http.post_with_retry(baseurl, params=payload, cookies={'Cookie': cookie})
 
     if res is None:
-        print('Failed to download data (ticker={},startdate={},enddate={}) from yahoo finance.'.format(ticker, t0, t1))
+        print('Failed to download data (ticker={}, startdate={}, enddate={}) from yahoo finance.'.format(ticker, t0, t1))
         return None
 
     return res.text
@@ -53,6 +76,7 @@ def get_args():
     args.t1 = date.datestr_offset(args.t1, 1)
 
     return args
+
 
 def main():
     a = get_args()
