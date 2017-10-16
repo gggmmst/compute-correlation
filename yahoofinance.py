@@ -5,7 +5,7 @@ import re
 # from datetime import datetime, timedelta
 
 import utils.http as http
-import utils.date as date
+import utils.dateutils as dateutils
 
 
 # LOG = logging.getLogger(__name__)
@@ -43,11 +43,14 @@ def crumb_and_cookie(ticker):
 
 def hist_px(ticker, t0, t1):
 
+    t0 = dateutils.datestr_offset(t0, 1)    # yahoo simply wants to make it hard for non-programmers
+    t1 = dateutils.datestr_offset(t1, 1)
+
     baseurl = fmt_baseurl.format(ticker)
 
     crumb, cookie = crumb_and_cookie(ticker)
-    payload = {'period1' : date.datestr_to_epoch(t0),
-               'period2' : date.datestr_to_epoch(t1),
+    payload = {'period1' : dateutils.datestr_to_epoch(t0),
+               'period2' : dateutils.datestr_to_epoch(t1),
                'interval': '1d',
                'events'  : 'history',
                'crumb'   : crumb}
@@ -72,8 +75,8 @@ def get_args():
 
     # pre-process
     args.sym = args.sym.upper()
-    args.t0 = date.datestr_offset(args.t0, 1)
-    args.t1 = date.datestr_offset(args.t1, 1)
+    # args.t0 = dateutils.datestr_offset(args.t0, 1)
+    # args.t1 = dateutils.datestr_offset(args.t1, 1)
 
     return args
 
