@@ -1,42 +1,38 @@
-import requests as rq
+# import requests as rq
 
-# from http import get_with_retry
+import httputils as uhttp
+import dateutils as udate
 
 baseurl = 'https://finance.google.com/finance/historical'
 
 def hist_px(ticker, t0, t1):
+
+    ticker = ticker.upper()
+    t0 = udate.datestr_to_datetime(t0).strftime('%Y%m%d')
+    t1 = udate.datestr_to_datetime(t1).strftime('%Y%m%d')
 
     payload = {'output'   : 'csv',
                'startdate': t0,
                'enddate'  : t1,
                'q'        : ticker}
 
-    # res = get_with_retry(baseurl, params=payload)
-    # if res is None:
-    #     return None
-    # return res.text
+    # http GET
+    res = uhttp.get_with_retry(baseurl, params=payload)
 
-    # LOG.info(res.url)
+    if res is None:
+        print('Failed to download data (ticker={}, startdate={}, enddate={}) from google finance.'.format(ticker, t0, t1))
+        return None
 
-    res = rq.get(baseurl, params=payload)
-
-    if not res.status_code == rq.codes.ok:
-        res.raise_for_status()
     return res.text
 
 
 def get_args():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('-s', '--sym', '--symbol', action='store', dest='sym', help='ticker symbol')
-    p.add_argument('--t0', '--start', '--startdate', action='store', dest='t0', help='start date')
-    p.add_argument('--t1', '--end', '--enddate', action='store', dest='t1', help='end date')
-    args = p.parse_args()
-
-    # pre-process
-    args.sym = args.sym.upper()         # ticker uppercase
-
-    return args
+    p.add_argument('-s', '--stock', '--sym', '--symbol', action='store', dest='sym', help='ticker symbol')
+    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', dest='t0', help='start date (inclusive)')
+    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', dest='t1', help='end date (inclusive)')
+    return p.parse_args()
 
 
 def main():
@@ -46,4 +42,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
