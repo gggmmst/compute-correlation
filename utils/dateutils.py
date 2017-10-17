@@ -17,7 +17,7 @@ date_fmts = [sep.join(t) for sep, t in product(date_seps, date_spec)]
 ## API
 ##
 
-def datestr_to_datetime(datestr, keep_fmt=False):
+def datestr_to_datetime(datestr, return_fmt=False):
     """\
     Convert date string into datetime object.
     """
@@ -27,10 +27,24 @@ def datestr_to_datetime(datestr, keep_fmt=False):
         except ValueError as ex:
             print(ex)   # TODO logging debug
         else:
-            return (fmt, dt) if keep_fmt else dt
+            return (fmt, dt) if return_fmt else dt
     m = 'Failed to parse date string ({}): Invalid date or fail to match these formats {}.'.format(datestr, repr(date_fmts))
     print(m)        # TODO logging error
     return None
+
+## Convert datestr to <datetime obj>
+# >>> datestr_to_datetime('20151213')
+# datetime.datetime(2015, 12, 13, 0, 0)
+# >>> datestr_to_datetime('2015-12-13')
+# datetime.datetime(2015, 12, 13, 0, 0)
+
+## With return_fmt=True, returns a tuple of (<datestr format>, <datetime obj>)
+# >>> datestr_to_datetime('2015-12-13', True)
+# ('%Y-%m-%d', datetime.datetime(2015, 12, 13, 0, 0))
+# >>> datestr_to_datetime('20151213', True)
+# ('%Y%m%d', datetime.datetime(2015, 12, 13, 0, 0))
+# >>> datestr_to_datetime('2015.12.13', True)
+# ('%Y.%m.%d', datetime.datetime(2015, 12, 13, 0, 0))
 
 
 def datestr_to_epoch(datestr):
@@ -44,6 +58,13 @@ def datestr_offset(datestr, inc=1, fmt=None):
         fmt = _fmt
     dt += timedelta(days=inc)
     return dt.strftime(fmt)
+
+# >>> datestr_offset('20010101', 1)
+# '20010102'
+# >>> datestr_offset('20010101', 1, fmt='%Y-%m-%d')
+# '2001-01-02'
+# >>> datestr_offset('2001-01-01', 1, fmt='%Y.%m.%d')
+# '2001.01.02'
 
 
 def idates(start, end, predicate=lambda x:True):
@@ -59,12 +80,14 @@ def idates(start, end, predicate=lambda x:True):
 
 def is_weekend(dt):
     e = dt.weekday()
-    return e == 5 or e == 6     # saturday or sunday
+    return e >= 5               # same as below, but only check 1 cond (as opposed to 2)
+    # return e == 5 or e == 6     # saturday OR sunday
 
 
 def is_weekday(dt):
     e = dt.weekday()
-    return e != 5 and e != 6    # not saturday and not sunday
+    return e < 5
+    # return e != 5 and e != 6    # not saturday AND not sunday
 
 
 ###################################################
