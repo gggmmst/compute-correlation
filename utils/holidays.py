@@ -1,6 +1,8 @@
 
-from dateutils import datestr_to_datetime, idates, is_weekday
+from dateutils import datestr_to_datetime, idates, is_weekend
 
+
+# US market trading holidays
 holidays = set([
 # http://nyseholidays.blogspot.com/2012/11/nyse-holidays-from-2000-2010.html
 '2001-01-01', '2001-01-15', '2001-02-19', '2001-04-13', '2001-05-28', '2001-07-04', '2001-09-03', '2001-09-11', '2001-09-12', '2001-09-13', '2001-09-14', '2001-11-22', '2001-12-25',
@@ -29,8 +31,10 @@ holidays = set([
 # holidays of datetime type
 holidays_dt = set(datestr_to_datetime(s) for s in holidays)
 
-def trading_days(start, end):
-    return idates(start, end, lambda dt: is_weekday(dt) and dt not in holidays_dt)
+def trading_dates(start, end):
+    # exclude (weekends OR holidays)
+    pred = lambda dt: not (is_weekend(dt) or dt in holidays_dt)
+    return idates(start, end, pred)
 
 
-# print(list(trading_days('20010101', '20010117')))
+print(list(trading_dates('20010101', '20010117')))
