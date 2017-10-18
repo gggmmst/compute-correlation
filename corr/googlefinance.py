@@ -29,9 +29,9 @@ def hist_px(ticker, t0, t1):
 def get_args():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('-s', '--stock', '--sym', '--symbol', action='store', dest='sym', help='ticker symbol')
-    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', dest='t0', help='start date (inclusive)')
-    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', dest='t1', help='end date (inclusive)')
+    p.add_argument('-s', '--stock', '--sym', '--symbol', action='store', required=True, dest='sym', help='ticker symbol')
+    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', required=True, dest='t0', help='start date (inclusive)')
+    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', required=True, dest='t1', help='end date (inclusive)')
     return p.parse_args()
 
 
