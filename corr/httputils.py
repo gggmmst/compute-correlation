@@ -20,17 +20,17 @@ def request_with_retry(req, attempts=4, delay=1, backoff=1.6):
         for attempt in range(attemtps):
             try:
                 res = req(*a, **kw)
-                print(res.url)   # TODO logging
+                print(res.url)   # TODO logging.info
                 if not res.status_code == rq.codes.ok:
                     res.raise_for_status()
                 return res
             except RequestException as ex:
-                print(ex)        # TODO make logging
+                print(ex)        # TODO logging.info
                 print('Request attempt #{} failed, retry in {} seconds ...'.format(attempt+1, delay))   # TODO logging
                 time.sleep(delay)
                 delay *= backoff
             except Exception as ex:
-                print(ex)    # TODO make logging
+                print(ex)    # TODO logging.error
         print('Request failed: maximum request attemtps({}) reached.'.format(attemtps))
         return None
 
