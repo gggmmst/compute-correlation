@@ -9,9 +9,9 @@ else:
 def get_args():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', dest='syms', help='list of stock symbols')
-    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', dest='t0', help='start date (inclusive)')
-    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', dest='t1', help='end date (inclusive)')
+    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', required=True, dest='syms', help='list of stock symbols')
+    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', required=True, dest='t0', help='start date (inclusive)')
+    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', required=True, dest='t1', help='end date (inclusive)')
     args = p.parse_args()
 
     # pre-process
@@ -23,7 +23,10 @@ def get_args():
 
 def main():
     a = get_args()
-    print(download_texts(a.syms, a.t0, a.t1))
+    res = download_texts(a.syms, a.t0, a.t1)
+    for sym, raw in zip(a.syms, res):
+        print(sym)
+        print(raw)
 
 
 def test():

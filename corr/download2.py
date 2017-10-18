@@ -5,18 +5,25 @@ from yahoofinance import hist_px
 WORKERS = 9
 
 
-def download_texts(syms, t0, t1):
-    args = [(t, t0, t1) for t in syms]
+def download_texts(*args):
+    args = process_args(args)
     resp = Pool(WORKERS).map(lambda a:hist_px(*a), args)
     return resp
+
+
+# TODO explain
+def process_args(args):
+    if isinstance(args[1], str):
+        return [(t, args[1], args[2]) for t in args[0]]
+    return args
 
 
 def get_args():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', dest='syms', help='list of stock symbols')
-    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', dest='t0', help='start date (inclusive)')
-    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', dest='t1', help='end date (inclusive)')
+    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', required=True, dest='syms', help='list of stock symbols')
+    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', required=True, dest='t0', help='start date (inclusive)')
+    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', required=True, dest='t1', help='end date (inclusive)')
     args = p.parse_args()
 
     # pre-process

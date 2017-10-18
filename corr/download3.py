@@ -22,27 +22,35 @@ def aio_eventloop():
         loop.close()
 
 
-async def async_download_texts(executor, syms, t0, t1):
+async def async_download_texts(executor, args):
     func = lambda a: hist_px(*a)
-    args = [(t, t0, t1) for t in syms]
     coros = [aio.get_event_loop().run_in_executor(executor, func, arg) for arg in args]
     return await aio.gather(*coros)
 
 
-def download_texts(syms, t0, t1):
+def download_texts(*args):
+
+    args = process_args(args)
 
     with aio_eventloop() as loop, ThreadPoolExecutor(max_workers=WORKERS) as executor:
-        results = loop.run_until_complete(async_download_texts(executor, syms, t0, t1))
+        results = loop.run_until_complete(async_download_texts(executor, args))
 
     return results
+
+
+# TODO explain
+def process_args(args):
+    if isinstance(args[1], str):
+        return [(t, args[1], args[2]) for t in args[0]]
+    return args
 
 
 def get_args():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', dest='syms', help='list of stock symbols')
-    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', dest='t0', help='start date (inclusive)')
-    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', dest='t1', help='end date (inclusive)')
+    p.add_argument('-s', '--stocks', '--syms', '--symbols', nargs='+', action='store', required=True, dest='syms', help='list of stock symbols')
+    p.add_argument('--start-date', '--t0', '--start', '--startdate', action='store', required=True, dest='t0', help='start date (inclusive)')
+    p.add_argument('--last-date', '--t1', '--end', '--enddate', action='store', required=True, dest='t1', help='end date (inclusive)')
     args = p.parse_args()
 
     # pre-process
