@@ -57,14 +57,13 @@ def crumb_and_cookie(sym):
 def hist_px(sym, t0, t1):
 
     sym = sym.upper()
-    t0 = udate.datestr_offset(t0, 1)    # yahoo simply wants to make it hard for non-programmers
-    t1 = udate.datestr_offset(t1, 1)
 
     baseurl = fmt_baseurl.format(sym)
 
     crumb, cookie = crumb_and_cookie(sym)
-    payload = {'period1' : udate.datestr_to_epoch(t0),
-               'period2' : udate.datestr_to_epoch(t1),
+
+    payload = {'period1' : int(udate.datestr_to_epoch(t0)),
+               'period2' : int(udate.datestr_to_epoch(t1)),
                'interval': '1d',
                'events'  : 'history',
                'crumb'   : crumb}
