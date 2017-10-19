@@ -20,6 +20,20 @@ date_fmts = [sep.join(t) for sep, t in product(date_seps, date_spec)]
 def datestr_to_datetime(datestr, return_fmt=False):
     """\
     Convert date string into datetime object.
+
+    # Convert datestr to <datetime obj>
+    >>> datestr_to_datetime('20151213')
+    datetime.datetime(2015, 12, 13, 0, 0)
+    >>> datestr_to_datetime('2015-12-13')
+    datetime.datetime(2015, 12, 13, 0, 0)
+
+    # With return_fmt=True, returns a tuple of (<datestr format>, <datetime obj>)
+    >>> datestr_to_datetime('2015-12-13', True)
+    ('%Y-%m-%d', datetime.datetime(2015, 12, 13, 0, 0))
+    >>> datestr_to_datetime('20151213', True)
+    ('%Y%m%d', datetime.datetime(2015, 12, 13, 0, 0))
+    >>> datestr_to_datetime('2015.12.13', True)
+    ('%Y.%m.%d', datetime.datetime(2015, 12, 13, 0, 0))
     """
     for fmt in date_fmts:
         try:
@@ -32,19 +46,6 @@ def datestr_to_datetime(datestr, return_fmt=False):
     print(m)        # TODO logging error
     return None
 
-## Convert datestr to <datetime obj>
-# >>> datestr_to_datetime('20151213')
-# datetime.datetime(2015, 12, 13, 0, 0)
-# >>> datestr_to_datetime('2015-12-13')
-# datetime.datetime(2015, 12, 13, 0, 0)
-
-## With return_fmt=True, returns a tuple of (<datestr format>, <datetime obj>)
-# >>> datestr_to_datetime('2015-12-13', True)
-# ('%Y-%m-%d', datetime.datetime(2015, 12, 13, 0, 0))
-# >>> datestr_to_datetime('20151213', True)
-# ('%Y%m%d', datetime.datetime(2015, 12, 13, 0, 0))
-# >>> datestr_to_datetime('2015.12.13', True)
-# ('%Y.%m.%d', datetime.datetime(2015, 12, 13, 0, 0))
 
 
 def datestr_to_epoch(datestr):
@@ -53,18 +54,20 @@ def datestr_to_epoch(datestr):
 
 
 def datestr_offset(datestr, inc=1, fmt=None):
+    """\
+    >>> datestr_offset('20010101', 1)
+    '20010102'
+    >>> datestr_offset('20010101', 1, fmt='%Y-%m-%d')
+    '2001-01-02'
+    >>> datestr_offset('2001-01-01', 1, fmt='%Y.%m.%d')
+    '2001.01.02'
+    """
     _fmt, dt = datestr_to_datetime(datestr, True)
     if fmt is None:     # assume same as input format if output format is not specified
         fmt = _fmt
     dt += timedelta(days=inc)
     return dt.strftime(fmt)
 
-# >>> datestr_offset('20010101', 1)
-# '20010102'
-# >>> datestr_offset('20010101', 1, fmt='%Y-%m-%d')
-# '2001-01-02'
-# >>> datestr_offset('2001-01-01', 1, fmt='%Y.%m.%d')
-# '2001.01.02'
 
 
 def idates(start, end, predicate=lambda x:True):
@@ -79,12 +82,14 @@ def idates(start, end, predicate=lambda x:True):
 
 
 def is_weekend(dt):
+    """Returns True if given datetime is a weekend"""
     e = dt.weekday()
     return e >= 5               # same as below, but only check 1 cond (as opposed to 2)
     # return e == 5 or e == 6     # saturday OR sunday
 
 
 def is_weekday(dt):
+    """Returns True if given datetime is a weekday"""
     e = dt.weekday()
     return e < 5
     # return e != 5 and e != 6    # not saturday AND not sunday
