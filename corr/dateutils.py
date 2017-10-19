@@ -85,18 +85,25 @@ def datestr_to_epoch(datestr):
 
 def datestr_offset(datestr, inc=1, fmt=None):
     """\
-    *Deprecated*
-
     Increment or decrement date string
+
+    Args:
+        datestr (str) : e.g. '2010-10-10' or '20121212'
+        inc (int) default=1: increment size
+        fmt (str) default=None: output format of the date string
+
+    Returns:
+        a date string
 
     >>> datestr_offset('20010101', 1)
     '20010102'
+    >>> datestr_offset('20010101', -1)
+    '20001231'
     >>> datestr_offset('20010101', 1, fmt='%Y-%m-%d')
     '2001-01-02'
     >>> datestr_offset('2001-01-01', 1, fmt='%Y.%m.%d')
     '2001.01.02'
     """
-
     _fmt, dt = datestr_to_datetime(datestr, True)
     if fmt is None:     # assume same as input format if output format is not specified
         fmt = _fmt
