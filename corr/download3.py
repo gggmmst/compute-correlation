@@ -68,8 +68,8 @@ def main():
 def test():
     t0 = '2015-10-10'
     t1 = '2015-11-11'
-    tickers = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
-    res = download_texts(tickers, t0, t1)
+    syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
+    res = download_texts(syms, t0, t1)
     import pdb
     pdb.set_trace()
     return res

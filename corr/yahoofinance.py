@@ -8,6 +8,7 @@ import dateutils as udate
 
 # LOG = logging.getLogger(__name__)
 
+# LOG.warn('lkajd;ajf;akljf') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< XXX
 
 fmt_metaurl = 'https://finance.yahoo.com/quote/{0}/history?p={0}'
 fmt_baseurl = 'https://query1.finance.yahoo.com/v7/finance/download/{}'
@@ -19,11 +20,11 @@ class YahooFinanceException(Exception):
         super(YahooFinanceException, self).__init__(msg)
         print(msg)
         # LOG.error(msg)
-        # LOG.error(msg, exc_info=True)
+        # logging.error(msg, exc_info=True)
 
 
-def crumb_and_cookie(ticker):
-    metaurl = fmt_metaurl.format(ticker)
+def crumb_and_cookie(sym):
+    metaurl = fmt_metaurl.format(sym)
     res = uhttp.get_with_retry(metaurl)     # http GET
     # extract cookie
     cookie = res.headers.get('set-cookie')
@@ -39,15 +40,15 @@ def crumb_and_cookie(ticker):
     return crumb, cookie
 
 
-def hist_px(ticker, t0, t1):
+def hist_px(sym, t0, t1):
 
-    ticker = ticker.upper()
+    sym = sym.upper()
     t0 = udate.datestr_offset(t0, 1)    # yahoo simply wants to make it hard for non-programmers
     t1 = udate.datestr_offset(t1, 1)
 
-    baseurl = fmt_baseurl.format(ticker)
+    baseurl = fmt_baseurl.format(sym)
 
-    crumb, cookie = crumb_and_cookie(ticker)
+    crumb, cookie = crumb_and_cookie(sym)
     payload = {'period1' : udate.datestr_to_epoch(t0),
                'period2' : udate.datestr_to_epoch(t1),
                'interval': '1d',
@@ -58,7 +59,8 @@ def hist_px(ticker, t0, t1):
     res = uhttp.post_with_retry(baseurl, params=payload, cookies={'Cookie': cookie})
 
     if res is None:
-        print('Failed to download data (ticker={}, startdate={}, enddate={}) from yahoo finance.'.format(ticker, t0, t1))
+        # TODO logging.error
+        LOG.error('Failed to download data (sym={}, startdate={}, enddate={}) from yahoo finance.'.format(sym, t0, t1))
         return None
 
     return res.text

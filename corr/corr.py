@@ -79,7 +79,7 @@ def test():
     syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
 
     texts = download_texts(syms, t0, t1)
-    px = dict((ticker, text_to_ts(text, 'Adj Close')) for ticker, text in zip(syms, texts))
+    px = dict((sym, text_to_ts(text, 'Adj Close')) for sym, text in zip(syms, texts))
     df = pd.DataFrame(px)
     print(df.corr())
 

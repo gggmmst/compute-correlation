@@ -1,26 +1,29 @@
-# import requests as rq
+# import logging
+
+# LOG.getLogger(__name__)
 
 import httputils as uhttp
 import dateutils as udate
 
 baseurl = 'https://finance.google.com/finance/historical'
 
-def hist_px(ticker, t0, t1):
+def hist_px(sym, t0, t1):
 
-    ticker = ticker.upper()
+    sym = sym.upper()
     t0 = udate.datestr_to_datetime(t0).strftime('%Y%m%d')
     t1 = udate.datestr_to_datetime(t1).strftime('%Y%m%d')
 
     payload = {'output'   : 'csv',
                'startdate': t0,
                'enddate'  : t1,
-               'q'        : ticker}
+               'q'        : sym}
 
     # http GET
     res = uhttp.get_with_retry(baseurl, params=payload)
 
     if res is None:
-        print('Failed to download data (ticker={}, startdate={}, enddate={}) from google finance.'.format(ticker, t0, t1))
+        # TODO logging.error
+        print('Failed to download data (sym={}, startdate={}, enddate={}) from google finance.'.format(sym, t0, t1))
         return None
 
     return res.text
