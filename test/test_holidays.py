@@ -1,7 +1,5 @@
 import unittest
 
-from datetime import datetime
-
 from corr.holidays import (
     trading_dates,
 )
