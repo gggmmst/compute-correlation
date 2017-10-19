@@ -57,6 +57,9 @@ def crumb_and_cookie(sym):
 def hist_px(sym, t0, t1):
 
     sym = sym.upper()
+    t1 = udate.datestr_offset(t1, 1)    # without this, t1 will not be included
+                                        # i.e. yahoofinance excludes enddate by default
+                                        # so we need to increment enddate by 1d manually
 
     baseurl = fmt_baseurl.format(sym)
 
