@@ -1,5 +1,7 @@
-
 from dateutils import datestr_to_datetime, idates, is_weekend
+
+
+############################################################
 
 
 # US market trading holidays
@@ -31,7 +33,22 @@ holidays = set([
 # holidays of datetime type
 holidays_dt = set(datestr_to_datetime(s) for s in holidays)
 
+
+############################################################
+## API
+##
+
 def trading_dates(start, end):
+    """
+    All trading dates (no weekends and no trading holidays) from startdate to enddate (inclusive)
+
+    Args:
+        start (str) : start date,      e.g. '2015-06-07'
+        end   (str) : end (last) date, e.g. '2015-08-09'
+
+    Returns:
+        A generator of trading dates
+    """
     # exclude (weekends OR holidays)
     pred = lambda dt: not (is_weekend(dt) or dt in holidays_dt)
     return idates(start, end, pred)
