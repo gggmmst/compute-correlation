@@ -26,13 +26,27 @@ class CacheException(Exception):
 
 
 class Cache(object):
-    # TODO docstring
-
+    """\
+    Provide data with the following policy:
+        - if db has required data (by checking sym and dates),
+            then (stay offline) return data
+        - otherwise download data online from sources (e.g. yahoofinance/googlefinance),
+            then save freshly downloaded data to db,
+            and then return data
+    """
 
     @classmethod
     def is_cached(cls, sym, t0, t1):
-        """Check if db already has the data we need"""
+        """\
+        Check if db already has the data we need
 
+        Args:
+            sym (str) : ticker symbol
+            t0  (str) : start date
+            t1  (str) : end date
+        Returns:
+            True if data required is cached in db; False otherwise
+        """
         # convert datestr to yyyy-mm-dd format
         t0 = datestr_to_datetime(t0).strftime('%Y-%m-%d')
         t1 = datestr_to_datetime(t1).strftime('%Y-%m-%d')
@@ -40,7 +54,7 @@ class Cache(object):
         # dates we need (to download, potentially)
         need = set(trading_dates(t0, t1))
         # dates we have (from db cache)
-        have = set(flatten(fetch(sym, t0, t1, cols='date')))        # <<<<<<<<< XXX fetch CONN
+        have = set(flatten(fetch(sym, t0, t1, cols='date')))
 
         # compute set diff and determine if download is needed
         return len(need - have) == 0
@@ -54,7 +68,6 @@ class Cache(object):
 
 
     def get_data(self):
-
         # set of syms in which data has (offline) cached
         syms_offline = set(sym for sym in self.syms if self.is_cached(sym, self.t0, self.t1))
         LOG.info('Symbols have (offline) data in db: {}'.format(syms_offline))
