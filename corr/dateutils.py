@@ -69,13 +69,24 @@ def datestr_to_datetime(datestr, return_fmt=False):
 
 
 def datestr_to_epoch(datestr):
-    """Convert datestr to Unix epoch"""
-    dt = datestr_to_datetime(datestr)
-    return dt.strftime('%s')
+    """\
+    Convert datestr to (Unix) epoch
+
+    Args:
+        datestr (str) : e.g. '2010-10-10' or '20121212'
+    Returns:
+        A float that represents the number of seconds elapsed since 1970-01-01 00:00:00 (UTC)
+    """
+    # https://stackoverflow.com/questions/11743019/convert-python-datetime-to-epoch-with-strftime
+    # *DO NOT* use strftime('%s')
+    dt_now = datestr_to_datetime(datestr)
+    return (dt_now - datetime(1970, 1, 1)).total_seconds()
 
 
 def datestr_offset(datestr, inc=1, fmt=None):
     """\
+    *Deprecated*
+
     Increment or decrement date string
 
     >>> datestr_offset('20010101', 1)
@@ -116,40 +127,4 @@ def is_weekday(dt):
     e = dt.weekday()
     return e < 5
     # return e != 5 and e != 6    # not saturday AND not sunday
-
-
-############################################################
-
-
-def test_datestr_to_datetime():
-    print(datestr_to_datetime('20120101'))
-    print(datestr_to_datetime('2017-12-31'))
-    print(datestr_to_datetime('2008.09.30'))
-    print(datestr_to_datetime('2008.09.31'))    # non-existent date
-    print(datestr_to_datetime('2017-12-34'))    # non-existent date
-
-def test_datestr_to_epoch():
-    print(datestr_to_epoch('20101111'))
-    print(datestr_to_epoch('1970-01-01'))
-
-def test_datestr_offset():
-    print(datestr_offset('2010-01-01'))
-    print(datestr_offset('20120304', -1))
-    print(datestr_offset('20120304', -1, '%Y-%m-%d'))
-    print(datestr_offset('2010-12-31'))
-    print(datestr_offset('2010-12-31', -1))
-
-def test_idates():
-    print(list(idates('20110101', '20110202')))
-    print(list(idates('20110101', '20110202', predicate=is_weekday)))
-    print(list(idates('20110101', '20110101')))
-
-def test():
-    test_datestr_to_datetime()
-    test_datestr_to_epoch()
-    test_datestr_offset()
-    test_idates()
-
-if __name__ == '__main__':
-    test()
 
