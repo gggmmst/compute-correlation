@@ -65,4 +65,39 @@ def trading_dates(start, end):
     return idates(start, end, pred)
 
 
-# print(list(trading_dates('20010101', '20010117')))
+############################################################
+## Example
+##
+
+def example():
+
+    from pprint import pprint as pp
+
+    cal = '''\
+    October 2017          November 2017         December 2017
+Su Mo Tu We Th Fr Sa  Su Mo Tu We Th Fr Sa  Su Mo Tu We Th Fr Sa
+ 1  2  3  4  5  6  7            1  2  3  4                  1  2
+ 8  9 10 11 12 13 14   5  6  7  8  9 10 11   3  4  5  6  7  8  9
+15 16 17 18 19 20 21  12 13 14 15 16 17 18  10 11 12 13 14 15 16
+22 23 24 25 26 27 28  19 20 21 22 23 24 25  17 18 19 20 21 22 23
+29 30 31              26 27 28 29 30        24 25 26 27 28 29 30
+                                            31
+'''
+    print(cal)
+
+    print('Holidays of 2017:')
+    pp(sorted(list(h for h in holidays if h.startswith('2017'))))
+    print()
+
+    def f(t0, t1):
+        print('Trading dates from {} to {}'.format(t0, t1))
+        print(list(trading_dates(t0, t1)))
+
+    f('2017-10-01', '2017-10-07')
+    print()
+    f('2017-11-19', '2017-11-25')
+    print()
+    f('2017-12-24', '2017-12-30')
+
+if __name__ == '__main__':
+    example()
