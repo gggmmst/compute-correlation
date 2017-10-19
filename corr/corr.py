@@ -1,28 +1,13 @@
+import logging
 import pandas as pd
 
-# def get_column(s):
-#     colnames = {'*' : '*',
-#                 's' : 'sym',
-#                 'd' : 'date',
-#                 'o' : 'open',
-#                 'h' : 'high',
-#                 'l' : 'low',
-#                 'c' : 'close',
-#                 'a' : 'adjclose',
-#                 'v' : 'volume'}
-#     nicknames = {'sym'     : 's',
-#                  'date'    : 'd', 'Date'     : 'd',
-#                  'open'    : 'o', 'Open'     : 'o',
-#                  'high'    : 'h', 'High'     : 'h',
-#                  'low'     : 'l', 'Low'      : 'l',
-#                  'close'   : 'c', 'Close'    : 'c',
-#                  'adjclose': 'a', 'Adj Close': 'a',
-#                  'volume'  : 'v', 'Volume'   : 'v'}
-#     if s in colnames:
-#         return colnames[s]
-#     if s in nicknames:
-#         return colnames[nicknames[s]]
-#     return None
+if __name__ == '__main__':
+    from _logging import *
+LOG = logging.getLogger(__name__)
+
+
+############################################################
+
 
 # db column names
 colnames_db = {'*' : '*',
@@ -43,7 +28,23 @@ colnames_yf = {'o' : 'Open',
                'a' : 'Adj Close',
                'v' : 'Volume'}
 
+
+############################################################
+
+
 def _nodb(syms, t0, t1, col='a'):
+    """\
+    Get price data online as if db/cache does not exist
+
+    Args:
+        syms (list of str) : a list of stock symbols, e.g. ['SPY', 'XLK', 'XLF']
+        t0 (str)           : start date datestr, e.g. '2016-01-01'
+        t1 (str)           : last date datestr,  e.g. '2016-06-06'
+        col (str)          : a character in colnames_yf.keys()
+
+    Returns:
+        A dataframe with price data
+    """
 
     try:
         from io import StringIO
@@ -53,11 +54,14 @@ def _nodb(syms, t0, t1, col='a'):
     from download import download_texts
 
     def text_to_ts(text, colname):
+        # convert text (csv-string) to DataFrame
+        # read_csv accepts stream/buffer, so StringIO is used to convert str->stream
         csv = StringIO(text)
         return pd.read_csv(csv, index_col=0, parse_dates=True)[colname]
 
     texts = download_texts(syms, t0, t1)
     colname = colnames_yf[col]
+    # without ordered dict, the syms order will be shuffled
     # px = dict((sym, text_to_ts(text, colname)) for sym, text in zip(syms, texts))
     px = OrderedDict((sym, text_to_ts(text, colname)) for sym, text in zip(syms, texts))
     df = pd.DataFrame(px)
@@ -65,34 +69,32 @@ def _nodb(syms, t0, t1, col='a'):
 
 
 def _ondemand(syms, t0, t1, col='a'):
+    """\
+    Get price data with the following policy:
+        - use offline data if db/cache has it
+        - on demand download data from online sources if db/cache does not have the data required
+        - save downloaded data to db/cache
+        - return price data
+
+    Args:
+        syms (list of str) : a list of stock symbols, e.g. ['SPY', 'XLK', 'XLF']
+        t0 (str)           : start date datestr, e.g. '2016-01-01'
+        t1 (str)           : last date datestr,  e.g. '2016-06-06'
+        col (str)          : a character in colnames_yf.keys()
+
+    Returns:
+        A dataframe with price data
+    """
+
     from cache import get_data
     colname = colnames_db[col]
     data = get_data(syms, t0, t1, colname)
     df = pd.DataFrame(data)
-    df = df[list(syms)]      # keep colnames in original order
+    df = df[list(syms)]         # keep syms in original order
     return df
 
 
-def test():
-    t0 = '2015-10-10'
-    t1 = '2015-11-11'
-    syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
-
-    texts = download_texts(syms, t0, t1)
-    px = dict((sym, text_to_ts(text, 'Adj Close')) for sym, text in zip(syms, texts))
-    df = pd.DataFrame(px)
-    print(df.corr())
-
-
-def test2():
-    t0 = '2015-04-22'
-    t1 = '2015-06-11'
-    syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
-
-    data = get_data(syms, t0, t1)
-    df = pd.DataFrame(data)
-    df = df[list(syms)]      # keep colnames in original order
-    print(df)
+############################################################
 
 
 def get_args():
@@ -115,12 +117,38 @@ def get_args():
     return args
 
 
+# def test():
+#     t0 = '2015-10-10'
+#     t1 = '2015-11-11'
+#     syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
+
+#     texts = download_texts(syms, t0, t1)
+#     px = dict((sym, text_to_ts(text, 'Adj Close')) for sym, text in zip(syms, texts))
+#     df = pd.DataFrame(px)
+#     print(df.corr())
+
+
+# def test2():
+#     t0 = '2015-04-22'
+#     t1 = '2015-06-11'
+#     syms = ('AAPL', 'MSFT', 'GOOG', 'XLK', 'GS', 'BAC', 'JPM', 'XLF')
+
+#     data = get_data(syms, t0, t1)
+#     df = pd.DataFrame(data)
+#     df = df[list(syms)]      # keep colnames in original order
+#     print(df)
+
+
 def main():
     args = get_args()
-    print(args)
-    workhorse = _nodb if args.nodb else _ondemand
+    # print(args)
+
+    workhorse = _nodb if args.nodb else _ondemand   # choose policy
     df = workhorse(args.syms, args.t0, args.t1, args.col)
     # print(df)
+
+    # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.corr.html
+    # compute pearson correlation coefficient and print result to stdout
     print(df.corr())
 
     # import pdb
@@ -129,5 +157,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # test2()
 

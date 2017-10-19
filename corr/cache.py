@@ -1,3 +1,4 @@
+import logging
 from dateutils import datestr_to_datetime
 from download import download_texts
 from db import insert_rows, fetch
@@ -5,14 +6,23 @@ from holidays import trading_dates
 from iterutils import flatten
 
 
+if __name__ == '__main__':
+    from _logging import *
+LOG = logging.getLogger(__name__)
+
+
+############################################################
+## Workhorse
+##
+
 def text_to_tokens(sym, text):
     lines = text.strip().split('\n')[1:]            # split by newline and drop header
     lines = [sym + ',' + line for line in lines]    # prepend each line with sym
     return [line.split(',') for line in lines]      # finally split each line by comma
 
 
-# class CacheException(Exception):
-#     pass
+class CacheException(Exception):
+    pass
 
 
 class Cache(object):
@@ -44,18 +54,22 @@ class Cache(object):
 
 
     def get_data(self):
+
         # set of syms in which data has (offline) cached
         syms_offline = set(sym for sym in self.syms if self.is_cached(sym, self.t0, self.t1))
+        LOG.info('Symbols have (offline) data in db: {}'.format(syms_offline))
+
         # set of syms in which (online) download is needed
         syms_online = set(self.syms) - syms_offline
-        print('offline:', syms_offline)     # TODO logging.info
-        print('online:', syms_online)      # TODO logging.info
-        # return {**self.data_online(syms_online), **self.data_offline(syms_offline)}       # py3 only
+        LOG.info('Symbols need (online) data download: {}'.format(syms_online))
+
+        # return {**self.data_online(syms_online), **self.data_offline(syms_offline)}       # oneliner; py3 only
         data = {}                                           # result placeholder
         if len(syms_online) > 0:
             data.update(self.data_online(syms_online))      # download data and update placeholder
         if len(syms_offline) > 0:
             data.update(self.data_offline(syms_offline))    # load data from db and update placeholder
+
         return data
 
 
@@ -64,25 +78,30 @@ class Cache(object):
 
 
     def data_online(self, syms):
-        texts = download_texts(syms, self.t0, self.t1)  # download (text) data
+        texts = download_texts(syms, self.t0, self.t1)      # download (text) data
         for sym, text in zip(syms, texts):
-            tokens = text_to_tokens(sym, text)          # process text to tokens
-            nrows = insert_rows(tokens)                 # insert tokens to db
-            print('{} new rows inserted to {}'.format(nrows, sym))      # TODO logging.info
+            tokens = text_to_tokens(sym, text)              # process text to tokens
+            nrows = insert_rows(tokens)                     # insert tokens to db
+            LOG.info('{} new rows inserted to {}'.format(nrows, sym))
         return self.data_offline(syms)
 
     # def data_online(self, syms):
-    #     texts = download_texts(syms, self.t0, self.t1)  # download (text) data
+    #     texts = download_texts(syms, self.t0, self.t1)      # download (text) data
     #     data = {}
     #     for sym, text in zip(syms, texts):
-    #         tokens = text_to_tokens(sym, text)          # process text to tokens
+    #         tokens = text_to_tokens(sym, text)              # process text to tokens
     #         ticker, date, open, high, low, close, adjclose, volume = zip(*tokens)
-    #         data[sym] = [float(x) for x in adjclose]    # px data to be returned
-    #         nrows = insert_rows(tokens)                 # insert tokens to db
-    #         print('{} new rows inserted to {}'.format(nrows, sym))      # TODO logging.info
+    #         data[sym] = [float(x) for x in adjclose]        # px data to be returned
+    #         nrows = insert_rows(tokens)                     # insert tokens to db
+    #         LOG.info('{} new rows inserted to {}'.format(nrows, sym))
     #     return data
 
+
+############################################################
+## API
+##
 
 def get_data(syms, t0, t1, cols='*'):
     c = Cache(syms, t0, t1, cols)
     return c.get_data()
+

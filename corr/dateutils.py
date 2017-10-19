@@ -1,8 +1,16 @@
-# import logging
+import logging
 from itertools import product
 from datetime import datetime, timedelta
 
-# LOG = logging.getLogger(__name__)
+
+if __name__ == '__main__':
+    from _logging import *
+LOG = logging.getLogger(__name__)
+
+
+############################################################
+## Consts
+##
 
 # date separators/specifiers/formats
 date_seps = ['-', '', '.']
@@ -13,13 +21,14 @@ date_fmts = [sep.join(t) for sep, t in product(date_seps, date_spec)]
 # ['%Y-%m-%d', '%Y%m%d', '%Y.%m.%d']
 
 
-##################################################
+############################################################
 ## API
 ##
 
 def datestr_to_datetime(datestr, return_fmt=False):
     """\
-    Convert date string into datetime object.
+    Convert date string into datetime object
+    Attempt to "guess" datestr format by iterate all the predefined formats (date_fmt)
 
     # Convert datestr to <datetime obj>
     >>> datestr_to_datetime('20151213')
@@ -34,27 +43,41 @@ def datestr_to_datetime(datestr, return_fmt=False):
     ('%Y%m%d', datetime.datetime(2015, 12, 13, 0, 0))
     >>> datestr_to_datetime('2015.12.13', True)
     ('%Y.%m.%d', datetime.datetime(2015, 12, 13, 0, 0))
+
+    Args:
+        datestr (str)     : e.g. '20001234', '2000.12.34', '2000-12-34'
+        return_fmt (bool) : if True, also return datestr's format
+
+    Returns:
+        a datetime object
     """
+
     for fmt in date_fmts:
         try:
             dt = datetime.strptime(datestr, fmt)
         except ValueError as ex:
-            print(ex)   # TODO logging debug
+            # cannot interpret datestr with assumed format
+            # swallow exception and try another format
+            LOG.debug(ex)
         else:
+            # succeed
             return (fmt, dt) if return_fmt else dt
-    m = 'Failed to parse date string ({}): Invalid date or fail to match these formats {}.'.format(datestr, repr(date_fmts))
-    print(m)        # TODO logging error
+
+    # failed
+    LOG.error('Failed to parse date string ({}): Invalid date or fail to match these formats {}.'.format(datestr, repr(date_fmts)))
     return None
 
 
-
 def datestr_to_epoch(datestr):
+    """Convert datestr to Unix epoch"""
     dt = datestr_to_datetime(datestr)
     return dt.strftime('%s')
 
 
 def datestr_offset(datestr, inc=1, fmt=None):
     """\
+    Increment or decrement date string
+
     >>> datestr_offset('20010101', 1)
     '20010102'
     >>> datestr_offset('20010101', 1, fmt='%Y-%m-%d')
@@ -62,12 +85,12 @@ def datestr_offset(datestr, inc=1, fmt=None):
     >>> datestr_offset('2001-01-01', 1, fmt='%Y.%m.%d')
     '2001.01.02'
     """
+
     _fmt, dt = datestr_to_datetime(datestr, True)
     if fmt is None:     # assume same as input format if output format is not specified
         fmt = _fmt
     dt += timedelta(days=inc)
     return dt.strftime(fmt)
-
 
 
 def idates(start, end, predicate=lambda x:True):
@@ -95,7 +118,7 @@ def is_weekday(dt):
     # return e != 5 and e != 6    # not saturday AND not sunday
 
 
-###################################################
+############################################################
 
 
 def test_datestr_to_datetime():

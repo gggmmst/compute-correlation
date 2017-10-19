@@ -1,9 +1,13 @@
-# import logging
-
-# LOG.getLogger(__name__)
+import logging
 
 import httputils as uhttp
 import dateutils as udate
+
+if __name__ == '__main__':
+    from _logging import *
+LOG = logging.getLogger(__name__)
+
+
 
 baseurl = 'https://finance.google.com/finance/historical'
 
@@ -22,8 +26,7 @@ def hist_px(sym, t0, t1):
     res = uhttp.get_with_retry(baseurl, params=payload)
 
     if res is None:
-        # TODO logging.error
-        print('Failed to download data (sym={}, startdate={}, enddate={}) from google finance.'.format(sym, t0, t1))
+        LOG.error('Failed to download data (sym={}, startdate={}, enddate={}) from google finance.'.format(sym, t0, t1))
         return None
 
     return res.text
@@ -43,5 +46,10 @@ def main():
     px = hist_px(a.sym, a.t0, a.t1)
     print(px)
 
+def test():
+    px = hist_px('TSLA', '2016-05-05', '2016-06-06')
+    print(px)
+
 if __name__ == '__main__':
     main()
+    # test()
