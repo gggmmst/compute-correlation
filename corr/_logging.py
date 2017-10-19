@@ -17,6 +17,6 @@ import logging
 logfmt = '%(asctime)s|%(name)s:%(lineno)s|%(levelname)s|%(message)s'
 logging.basicConfig(
     level=logging.DEBUG,
-#    level=logging.INFO,
+    # level=logging.INFO,
     format=logfmt,
 )
