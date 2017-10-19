@@ -1,11 +1,12 @@
-[x] multiple data source; google finance and yahoo finance
-[x] adjusted close
-[x] validate date, e.g. 2012-12-33
-[x] requests retry wrapper
-[ ] sqlite db cache
-[ ] trading calendar to check trading dates/holidays
-[ ] rq job queue
-[x] threading data download
-[ ] logging
-[ ] unittests
-[ ]
+- [x] multiple data source; google finance and yahoo finance
+- [x] adjusted close
+- [x] validate date, e.g. 2012-12-33
+- [x] requests retry wrapper
+- [x] sqlite db cache
+- [x] trading calendar to check trading dates/holidays
+- [ ] rq job queue
+- [x] threading data download (py2)
+- [x] asyncio data download (py3)
+- [x] logging
+- [-] unittests
+- [ ] examples
