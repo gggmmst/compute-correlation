@@ -5,7 +5,7 @@ from corr.holidays import (
 )
 
 
-class TestDateUtils(unittest.TestCase):
+class TestHolidays(unittest.TestCase):
 
     def test_trading_dates(self):
         self.assertEqual(list(trading_dates('2017-10-01', '2017-10-07')), ['2017-10-02', '2017-10-03', '2017-10-04', '2017-10-05', '2017-10-06'])

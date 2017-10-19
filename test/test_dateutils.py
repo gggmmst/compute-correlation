@@ -12,7 +12,7 @@ from corr.dateutils import (
 )
 
 
-class TestDateUtils(unittest.TestCase):
+class TestDateutils(unittest.TestCase):
 
     def setUp(self):
         pass
