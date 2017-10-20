@@ -149,7 +149,7 @@ def main():
 
     # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.corr.html
     # compute pearson correlation coefficient and print result to stdout
-    print(df.corr())
+    print(df.diff().corr())
 
     # import pdb
     # pdb.set_trace()
